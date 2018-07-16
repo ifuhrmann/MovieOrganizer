@@ -42,4 +42,6 @@ for x in movieList:
     movieObjList.append( movieClassInfo.MovieInfo(x.name,x.path, time.ctime(os.path.getmtime(x.path)) , os.path.getsize(x.path) ) )
 
 for x in movieObjList:
-    print(x)
+    x.scrapeImdb()
+    
+print("")

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from imdb import IMDb
 import time
+import re
 
 def imdbTest():
     ia = IMDb()
@@ -19,7 +20,10 @@ class MovieInfo():
         self.path = path
         self.modifiedTime = modifiedTime
         self.size = size
-    
+        self.actualName = actualName
+        self.hasSeen = hasSeen
+        self.imdb = imdb
+        self.personalRating = personalRating
     def __eq__(self,other):
         if self.name == other.name and self.path == other.path and self.modifiedTime== other.modifiedTime and self.size == other.size:
             return True
@@ -27,4 +31,19 @@ class MovieInfo():
             return False
     
     def __str__(self):
-        return( self.filename )
+        if(self.actualName is None):
+            return( self.filename )
+        else:
+            return self.actualName
+    def setSeen(self,value = True):
+        self.hasSeen = value
+    
+    def scrapeImdb(self):
+        word = re.split('\.| |-',self.filename)
+        s=word[0]
+        i=1
+        if(len(word) is not 1):
+            while "2" not in word[i] and "1" not in word[i] and i != len(word) and "=AKA=" not in word[i] and 'mkv' not in word[i] and "Director's" not in word[i]:
+                s+=" "+word[i]
+                i+=1
+        print(s)
