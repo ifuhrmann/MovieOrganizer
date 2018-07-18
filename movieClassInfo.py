@@ -24,8 +24,9 @@ class MovieInfo():
         self.hasSeen = hasSeen
         self.imdb = imdb
         self.personalRating = personalRating
+        
     def __eq__(self,other):
-        if self.name == other.name and self.path == other.path and self.modifiedTime== other.modifiedTime and self.size == other.size:
+        if self.name == other.name and self.path == other.path and self.modifiedTime == other.modifiedTime and self.size == other.size:
             return True
         else:
             return False
@@ -43,7 +44,24 @@ class MovieInfo():
         s=word[0]
         i=1
         if(len(word) is not 1):
-            while "2" not in word[i] and "1" not in word[i] and i != len(word) and "=AKA=" not in word[i] and 'mkv' not in word[i] and "Director's" not in word[i]:
+            while "2" not in word[i] and "1" not in word[i] and i != len(word) and "=aka=" not in word[i].lower() and 'mkv' not in word[i] and "Director's" not in word[i] and 'aka' != word[i].lower():
                 s+=" "+word[i]
                 i+=1
         print(s)
+        
+        ia = IMDb()
+        m = ia.search_movie(s)
+        ia.update(m[0])
+        self.actualName = m[0].get('title')
+        self.imdb = m[0].movieID
+        
+        print(m[0].movieID,m[0].get('title'),m[0].get('plot summary'))
+        
+    def updateName(self,name):
+        self.actualName=name
+    
+    def updateImdb(self,imdb):
+        self.imdb=imdb
+    
+    def updateRating(self,rate):
+        self.personalRating=rate

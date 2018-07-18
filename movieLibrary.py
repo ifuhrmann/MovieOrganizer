@@ -31,7 +31,7 @@ for d in directory:
             if ".mkv" in d2.name and "sample" not in d2.name.lower():
                 movieList.append(d2)
     else:
-        if "sample" not in d.name.lower() and 'System Volume Information' not in d.name:
+        if "sample" not in d.name.lower() and 'System Volume Information' not in d.name and ('mkv' in d.name or 'mp4' in d.name):
             movieList.append(d)
 
 print(len(movieList))
@@ -42,6 +42,9 @@ for x in movieList:
     movieObjList.append( movieClassInfo.MovieInfo(x.name,x.path, time.ctime(os.path.getmtime(x.path)) , os.path.getsize(x.path) ) )
 
 for x in movieObjList:
+    break
     x.scrapeImdb()
-    
+
 print("")
+
+movieObjList[2].scrapeImdb()

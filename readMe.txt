@@ -1,0 +1,1 @@
+Uses IMDBpy and sqlAlchemy libraries
