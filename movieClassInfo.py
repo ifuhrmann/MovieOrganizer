@@ -13,7 +13,7 @@ def imdbTest():
     ia.update(m[0])
     print(m[0].movieID,m[0].get('directed by'))
     print(time.time()-tinit)
-
+#put in IMDb rating, year of movie
 class MovieInfo():
     def __init__(self,filename,path,modifiedTime,size,actualName=None,hasSeen=False,imdb=None,personalRating=None):
         self.filename = filename
@@ -44,7 +44,7 @@ class MovieInfo():
         s=word[0]
         i=1
         if(len(word) is not 1):
-            while "20" not in word[i] and "19" not in word[i] and i != len(word) and "=aka=" not in word[i].lower() and 'mkv' not in word[i] and "Director's" not in word[i] and 'aka' != word[i].lower():
+            while "20" not in word[i] and "19" not in word[i] and i != len(word) and "=aka=" not in word[i].lower() and 'mkv' not in word[i] and "Director's" not in word[i] and 'aka' != word[i].lower() and '1080' not in word[i] and 'S01' not in word[i]:
                 s+=" "+word[i]
                 i+=1
         print(s)

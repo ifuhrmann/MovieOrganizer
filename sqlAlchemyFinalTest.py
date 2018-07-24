@@ -34,12 +34,12 @@ session = DBSession()
     
 Base.metadata.create_all(engine)
    
-
+direct = "F:/"
 
 try:
-    users = Table('users', metadata, autoload=True)
+    users = Table(direct, metadata, autoload=True)
 except:
-    users = Table('users',metadata,
+    users = Table(direct,metadata,
                   Column('id',Integer, primary_key=True),
                   Column('x',Integer),
                   Column('y',Integer)
@@ -53,11 +53,24 @@ for t in metadata.sorted_tables:
 
 
 i=users.insert()
-i.execute({"x":12,"y":132})
+i.execute({"x":13,"y":2312})
 
-s = users.select()
+s = users.select().where(users.c.id >= 5).order_by('x')
+rs = s.execute()
+row = rs.fetchall()
+for r in row:
+    print(r['id'],r['x'],r['y'])
+print("\n\n")
+
+d = users.delete().where(users.c.id == 5)
+rs = d.execute()
+print(rs)
+
+print("\n\n")
+s=users.select()
 rs = s.execute()
 row = rs.fetchall()
 for r in row:
     print(r[0],r[1],r[2])
+
 session.close()
