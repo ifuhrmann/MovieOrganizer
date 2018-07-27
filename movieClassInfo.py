@@ -51,11 +51,11 @@ class MovieInfo():
         
         ia = IMDb()
         m = ia.search_movie(s)
-        ia.update(m[0])
-        self.actualName = m[0].get('title')
-        self.imdb = m[0].movieID
-        
-        print(m[0].movieID,m[0].get('title'),m[0].get('plot summary'))
+        if(len(m) is not 0):
+            ia.update(m[0])
+            self.actualName = m[0].get('title')
+            self.imdb = m[0].movieID
+            print(m[0].movieID,m[0].get('title'),m[0].get('plot summary'))
         
     def updateName(self,name):
         self.actualName=name
