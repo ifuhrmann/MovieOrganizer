@@ -44,7 +44,7 @@ class MovieInfo():
         s=word[0]
         i=1
         if(len(word) is not 1):
-            while "20" not in word[i] and "19" not in word[i] and i != len(word) and "=aka=" not in word[i].lower() and 'mkv' not in word[i] and "Director's" not in word[i] and 'aka' != word[i].lower() and '1080' not in word[i] and 'S01' not in word[i]:
+            while "20" not in word[i] and "19" not in word[i] and i != len(word) and "=aka=" not in word[i].lower() and "mp4" not in word[i] and "mkv" not in word[i] and "Director's" not in word[i] and 'aka' != word[i].lower() and '1080' not in word[i] and 'S01' not in word[i]:
                 s+=" "+word[i]
                 i+=1
         print(s)
