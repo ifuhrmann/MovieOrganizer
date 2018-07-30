@@ -78,10 +78,14 @@ class MovieLibrary():
             if(d.is_dir() and 'System Volume Information' not in d.name):
                 levelTwoDir = os.scandir(d.path)
                 for d2 in levelTwoDir:
-                    if (not d2.is_dir()) and (d2.path.endswith(".mkv") or d2.path.endswith(".mp4")) and "sample" not in d2.name.lower() and os.path.getsize(d2) > 500000000:
+                    if ((not d2.is_dir()) and (d2.path.endswith(".mkv") or d2.path.endswith(".mp4")) and
+                        "sample" not in d2.name.lower() and os.path.getsize(d2) > 500000000 and
+                        "S0" not in d2.path):
                         movieList.append(d2)
             else:
-                if "sample" not in d.name.lower() and 'System Volume Information' not in d.name and 'DVD' not in d.name and (d.path.endswith(".mkv") or d.path.endswith(".mp4")) and os.path.getsize(d)  > 500000000:
+                if ("sample" not in d.name.lower() and 'System Volume Information' not in d.name and
+                    'DVD' not in d.name and (d.path.endswith(".mkv") or d.path.endswith(".mp4")) and
+                    os.path.getsize(d)  > 500000000 and "S0" not in d.path):
                     movieList.append(d)
         
         print(len(movieList))
@@ -162,7 +166,10 @@ class MovieLibrary():
                 if x == yinfo :
                     inDatabase = True
             if inDatabase == False:
-                x.scrapeImdb()
+                try:
+                    x.scrapeImdb()
+                except:
+                    print("stupid ratshit imdb search is down for some reason")
                 i=movies.insert()
                 print(x.modifiedTime)
                 i.execute({"filename":x.filename,"path":x.path,"modifiedTime":x.modifiedTime,
@@ -217,14 +224,58 @@ class MovieLibrary():
         row = rs.fetchall()
         mList = []
         for r in row:
-            mList.append(movieClassInfo.MovieInfo(r["filename"],r["path"],r["modifiedTime"],
+            for d in self.directories:
+                if(r["path"].startswith(d)):
+                    mList.append(movieClassInfo.MovieInfo(r["filename"],r["path"],r["modifiedTime"],
                                            r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"]))
+                    break
         print("\n"+str(len(row)))
         session.close()
         return mList
             
     
             
+    def updateAll(self):
+        Base = declarative_base()
+        db_path = "movieLibrary.db"
+        engine = create_engine('sqlite:///' + db_path)
+            # Bind the engine to the metadata of the Base class so that the
+            # declaratives can be accessed through a DBSession instance
+        Base.metadata.bind = engine
+        metadata = MetaData(engine)
+        
+        DBSession = sessionmaker(bind=engine)
+            # A DBSession() instance establishes all conversations with the database
+            # and represents a "staging zone" for all the objects loaded into the
+            # database session object. Any change made against the objects in the
+            # session won't be persisted into the database until you call
+            # session.commit(). If you're not happy about the changes, you can
+            # revert all of them back to the last commit by calling
+            # session.rollback()
+        session = DBSession()
+         
+        Base.metadata.create_all(engine)
+           
+        movies = Table('movies', metadata, autoload=True)
+        
+        s = movies.select()
+        rs = s.execute()
+        row = rs.fetchall()
+        for r in row:
+            if (r["imdb"]==None or r["imdb"]=="Imdb Update Failed"):
+                mov = movieClassInfo.MovieInfo(r["filename"],r["path"],r["modifiedTime"],
+                                           r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"])
+                try:
+                    mov.scrapeImdb()
+                    conn = engine.connect()
+                    stmt = movies.update().\
+                           values(imdb=mov.imdb,actualName=mov.actualName).\
+                           where(movies.c.path ==mov.path)
+                    conn.execute(stmt)
+                    print(mov.filename, "updated with name",mov.actualName,"imdb",mov.imdb)
+                except:
+                    print("stupid ratshit imdb isn't working")
+        session.close()
 
             
 
@@ -233,6 +284,18 @@ m = MovieLibrary(["D:/Movies/","F:/"])
 """
 m.sortBy("modifiedTime")
 """
-mList = m.sortBy('modifiedTime desc')
+mList = m.sortBy('modifiedTime')
 for mov in mList:
+    break
     print (mov,mov.filename)
+print("")
+
+m1 = MovieLibrary(["F:/"])
+mList = m1.sortBy('modifiedTime desc')
+for mov in mList:
+    break
+    print (mov,mov.filename)
+print("")
+print(len(mList))
+
+m.updateAll()

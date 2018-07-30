@@ -62,6 +62,14 @@ for r in row:
     print(r['id'],r['x'],r['y'])
 print("\n\n")
 
+conn = engine.connect()
+stmt = users.update().\
+       values(y=(users.c.y + 1)).\
+       where(users.c.x == 213)
+conn.execute(stmt)
+
+
+
 d = users.delete().where(users.c.id == 5)
 rs = d.execute()
 print(rs)

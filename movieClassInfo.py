@@ -56,6 +56,8 @@ class MovieInfo():
             self.actualName = m[0].get('title')
             self.imdb = m[0].movieID
             print(m[0].movieID,m[0].get('title'),m[0].get('plot summary'))
+        else:
+            self.imdb = "Imdb Update Failed"
         
     def updateName(self,name):
         self.actualName=name
