@@ -9,7 +9,7 @@ import os.path
 import time
 import sqlalchemy as sq
 import movieClassInfo
-from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime, func, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime, func, Boolean,Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -23,6 +23,7 @@ class MovieLibrary():
     def __init__(self, directories):
         self.directories=directories
         self.scrapeAll()
+
     
     def printAll(self):
         Base = declarative_base()
@@ -52,7 +53,7 @@ class MovieLibrary():
         row = rs.fetchall()
         for r in row:
             print( movieClassInfo.MovieInfo(r["filename"],r["path"],r["modifiedTime"],
-                                           r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"]))
+                                           r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"],r["imdbRating"]))
         print("\n"+str(len(row)))
         session.close()
 
@@ -136,7 +137,8 @@ class MovieLibrary():
                           Column('actualName',String),
                           Column('hasSeen',Boolean),
                           Column('imdb',String),
-                          Column('personalRating',Integer)
+                          Column('personalRating',Integer),
+                          Column('imdbRating',Float)
                           )
             movies.create()
             
@@ -162,7 +164,7 @@ class MovieLibrary():
             inDatabase = False
             for y in row:
                 yinfo = movieClassInfo.MovieInfo(y["filename"],y["path"],y["modifiedTime"],
-                                                 y["size"],y["actualName"],y["hasSeen"],y["imdb"],y["personalRating"])
+                                                 y["size"],y["actualName"],y["hasSeen"],y["imdb"],y["personalRating"],y["imdbRating"])
                 if x == yinfo :
                     inDatabase = True
             if inDatabase == False:
@@ -174,11 +176,11 @@ class MovieLibrary():
                 print(x.modifiedTime)
                 i.execute({"filename":x.filename,"path":x.path,"modifiedTime":x.modifiedTime,
                            "size":x.size,"actualName":x.actualName,"hasSeen":x.hasSeen,
-                           "imdb":x.imdb,"personalRating":x.personalRating})
+                           "imdb":x.imdb,"personalRating":x.personalRating,"imdbRating":x.imdbRating})
         for y in row:
             #ydatetime = datetime.strptime(y['modifiedTime'],"%Y-%m-%d %H:%M:%S")
             yinfo = movieClassInfo.MovieInfo(y["filename"],y["path"],y['modifiedTime'],
-                                             y["size"],y["actualName"],y["hasSeen"],y["imdb"],y["personalRating"])
+                                             y["size"],y["actualName"],y["hasSeen"],y["imdb"],y["personalRating"],y["imdbRating"])
             inFolder = False
             if(direct in y['path']):   
                 for x in movieObjList:
@@ -227,7 +229,7 @@ class MovieLibrary():
             for d in self.directories:
                 if(r["path"].startswith(d)):
                     mList.append(movieClassInfo.MovieInfo(r["filename"],r["path"],r["modifiedTime"],
-                                           r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"]))
+                                           r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"],r["imdbRating"]))
                     break
         print("\n"+str(len(row)))
         session.close()
@@ -262,15 +264,15 @@ class MovieLibrary():
         rs = s.execute()
         row = rs.fetchall()
         for r in row:
-            if (r["imdb"]==None or r["imdb"]=="Imdb Update Failed"):
+            if (r["imdb"]==None):
                 mov = movieClassInfo.MovieInfo(r["filename"],r["path"],r["modifiedTime"],
-                                           r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"])
+                                           r["size"],r["actualName"],r["hasSeen"],r["imdb"],r["personalRating"],r["imdbRating"])
                 try:
                     mov.scrapeImdb()
                     conn = engine.connect()
                     stmt = movies.update().\
-                           values(imdb=mov.imdb,actualName=mov.actualName).\
-                           where(movies.c.path ==mov.path)
+                           values(imdb = mov.imdb , actualName = mov.actualName , imdbRating = mov.imdbRating).\
+                           where(movies.c.path == mov.path)
                     conn.execute(stmt)
                     print(mov.filename, "updated with name",mov.actualName,"imdb",mov.imdb)
                 except:
@@ -278,12 +280,11 @@ class MovieLibrary():
         session.close()
 
             
-
+"""
 m = MovieLibrary(["D:/Movies/","F:/"])
 #m.printAll()
-"""
+
 m.sortBy("modifiedTime")
-"""
 mList = m.sortBy('modifiedTime')
 for mov in mList:
     break
@@ -291,11 +292,13 @@ for mov in mList:
 print("")
 
 m1 = MovieLibrary(["F:/"])
-mList = m1.sortBy('modifiedTime desc')
+mList = m1.sortBy('imdbRating')
 for mov in mList:
-    break
-    print (mov,mov.filename)
+    print (mov,mov.imdbRating)
 print("")
 print(len(mList))
 
 m.updateAll()
+"""
+
+#if you initialize a movieLibrary with a folder and a folder inside it you're going to hell

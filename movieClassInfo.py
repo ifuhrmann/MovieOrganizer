@@ -15,7 +15,7 @@ def imdbTest():
     print(time.time()-tinit)
 #put in IMDb rating, year of movie
 class MovieInfo():
-    def __init__(self,filename,path,modifiedTime,size,actualName=None,hasSeen=False,imdb=None,personalRating=None):
+    def __init__(self,filename,path,modifiedTime,size,actualName=None,hasSeen=False,imdb=None,personalRating=None,imdbRating = None):
         self.filename = filename
         self.path = path
         self.modifiedTime = modifiedTime
@@ -24,6 +24,7 @@ class MovieInfo():
         self.hasSeen = hasSeen
         self.imdb = imdb
         self.personalRating = personalRating
+        self.imdbRating = imdbRating
         
     def __eq__(self,other):
         if self.filename == other.filename and self.path == other.path and self.modifiedTime == other.modifiedTime and self.size == other.size:
@@ -55,6 +56,7 @@ class MovieInfo():
             ia.update(m[0])
             self.actualName = m[0].get('title')
             self.imdb = m[0].movieID
+            self.imdbRating=m[0].get('rating')
             print(m[0].movieID,m[0].get('title'),m[0].get('plot summary'))
         else:
             self.imdb = "Imdb Update Failed"

@@ -1,3 +1,3 @@
-Uses IMDBpy and sqlAlchemy libraries
-Run movieLibrary.py and nothing else for now.
-All sqlAlchemyTest files are not important
+Uses IMDBpy, sqlAlchemy, and pyqt5 libraries
+
+All files with test in the name are not important
