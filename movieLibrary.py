@@ -284,7 +284,7 @@ class MovieLibrary():
                     print("stupid ratshit imdb isn't working")
         session.close()
 
-m = MovieLibrary(["F:/","D:/Movies"])
+m = MovieLibrary(["F:/"])
 m.updateAll()
 mList = m.sortBy("modifiedTime desc")
 for mov in mList:

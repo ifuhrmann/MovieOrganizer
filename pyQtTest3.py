@@ -31,7 +31,7 @@ class Example(QMainWindow):
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAct)
-         
+        
         addMenu = QMenu("&Directory",self)
         addAction = QAction('Add Directory',self)
         rem = QAction("Remove Directory",self)
@@ -47,26 +47,19 @@ class Example(QMainWindow):
         view.addAction(viewAction)
         
         
-        #end menu stuff
-
-        exitAct = QAction( 'Exit', self)
+        
+        exitAct = QAction(QIcon('exit24.png'), 'Exit', self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.triggered.connect(self.safeQuit)
         
-        fakeAct = QAction( QIcon('yes.jpg'),'Yes', self)
-        
-
         self.toolbar = self.addToolBar('Exit')
         self.toolbar.addAction(exitAct)
-        self.toolbar.addAction(fakeAct)
         
-        #end toolbar stuff
         
-
-        self.statusBar()
-
         textEdit = QTextEdit()
         self.setCentralWidget(textEdit)
+
+        self.statusBar()
 
         
         self.setGeometry(300, 300, 350, 250)
