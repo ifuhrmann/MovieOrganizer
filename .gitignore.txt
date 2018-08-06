@@ -1,1 +1,1 @@
-*.db
+movieLibrary.db
