@@ -17,11 +17,6 @@ from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton,QDeskto
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QIcon,QFont
 
-import movieLibrary
-import movieClassInfo
-
-from PyQt5.QtGui import QIcon
-
 
 class Example(QWidget):
     

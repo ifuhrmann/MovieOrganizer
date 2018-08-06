@@ -6,7 +6,7 @@ Created on Tue Jul 31 12:25:15 2018
 """
 
 import sys
-from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication,QMenu
+from PyQt5.QtWidgets import QMainWindow, QAction, qApp, QApplication,QMenu,QTextEdit
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QCoreApplication
 
@@ -46,9 +46,40 @@ class Example(QMainWindow):
         viewAction.triggered.connect(self.toggleMenu)
         view.addAction(viewAction)
         
-        self.setGeometry(300, 300, 300, 200)
+        
+        
+        exitAct = QAction(QIcon('exit24.png'), 'Exit', self)
+        exitAct.setShortcut('Ctrl+Q')
+        exitAct.triggered.connect(self.safeQuit)
+        
+        self.toolbar = self.addToolBar('Exit')
+        self.toolbar.addAction(exitAct)
+        
+        
+        textEdit = QTextEdit()
+        self.setCentralWidget(textEdit)
+
+        self.statusBar()
+
+        
+        self.setGeometry(300, 300, 350, 250)
         self.setWindowTitle('Simple menu')    
         self.show()
+        
+         
+    def contextMenuEvent(self, event):
+       
+           cmenu = QMenu(self)
+           
+           newAct = cmenu.addAction("New")
+           opnAct = cmenu.addAction("Open")
+           quitAct = cmenu.addAction("Quit")
+           action = cmenu.exec_(self.mapToGlobal(event.pos()))
+           
+           if action == quitAct:
+               self.safeQuit()
+       
+   
         
     def safeQuit(self):
         """exit the application gently so Spyder IDE will not hang"""
@@ -65,7 +96,6 @@ class Example(QMainWindow):
         
         
 if __name__ == '__main__':
-    
     app = QCoreApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
