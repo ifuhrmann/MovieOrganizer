@@ -13,7 +13,8 @@ Last edited: August 2017
 """
 
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton
+from PyQt5.QtWidgets import (QWidget,QMainWindow, QTextEdit, 
+    QAction, QFileDialog, QApplication,QPushButton, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QIcon,QFont
 
@@ -23,44 +24,81 @@ import movieClassInfo
 from PyQt5.QtGui import QIcon
 
 
-class Example(QWidget):
+
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+"""
+ZetCode PyQt5 tutorial 
+
+In this example, we select a file with a
+QFileDialog and display its contents
+in a QTextEdit.
+
+Author: Jan Bodnar
+Website: zetcode.com 
+Last edited: August 2017
+"""
+class Example(QMainWindow):
     
     def __init__(self):
         super().__init__()
         
         self.initUI()
         
-    def safeQuit(self):
-        """exit the application gently so Spyder IDE will not hang"""
-        self.deleteLater()
-        self.close()
-        self.destroy()
+        
+    def initUI(self):      
 
+        self.statusBar()
+
+        openFile = QAction(QIcon('open.png'), 'Open', self)
+        openFile.setShortcut('Ctrl+O')
+        openFile.setStatusTip('Open new File')
+        openFile.triggered.connect(self.showDialog)
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(openFile)
+        
+        
+        self.textEdit = QTextEdit()
 
         
-    def initUI(self):
+        okButton = QPushButton("OK")
+        cancelButton = QPushButton("Cancel")
+
+        hbox = QHBoxLayout()
         
-        self.setWindowIcon(QIcon('web.png'))        
-        QToolTip.setFont(QFont('SansSerif', 10))
+        hbox.addStretch(1)
+        hbox.addWidget(okButton)
+        hbox.addStretch(1)
+        hbox.addWidget(cancelButton)
+        hbox.addStretch(1)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.textEdit)
+        vbox.addLayout(hbox)
         
-        self.setToolTip('This is a <b>QWidget</b> widget')
+        widget = QWidget()
+        widget.setLayout(vbox)    
+        self.setCentralWidget( widget )
+
         
-        btn = QPushButton('Button', self)
-        btn.setToolTip('This is a <b>QPushButton</b> widget <strong>This is deprecated HTML</strong>')
-        btn.resize(btn.sizeHint())
-        btn.move(50, 50)       
-        
-        self.setGeometry(300, 300, 300, 200)
-        self.setWindowTitle('Tooltips')    
-        
-        qbtn = QPushButton('Quit', self)
-        qbtn.clicked.connect(self.safeQuit)
-        qbtn.resize(qbtn.sizeHint())
-        qbtn.move(150, 150)       
-        
+        self.setGeometry(300, 300, 350, 300)
+        self.setWindowTitle('File dialog')
         self.show()
-
         
+        
+    def showDialog(self):
+
+        fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+
+        if fname[0]:
+            f = open(fname[0], 'r')
+
+            with f:
+                data = f.read()
+                self.textEdit.setText(data)        
         
 if __name__ == '__main__':
     

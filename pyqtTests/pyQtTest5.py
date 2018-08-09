@@ -13,8 +13,8 @@ Website: zetcode.com
 Last edited: August 2017
 """
 
-from PyQt5.QtWidgets import (QMainWindow, QTextEdit, 
-    QAction, QFileDialog, QApplication)
+from PyQt5.QtWidgets import (QWidget,QMainWindow, QTextEdit, 
+    QAction, QFileDialog, QApplication,QPushButton, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QCoreApplication
 import sys
@@ -29,8 +29,6 @@ class Example(QMainWindow):
         
     def initUI(self):      
 
-        self.textEdit = QTextEdit()
-        self.setCentralWidget(self.textEdit)
         self.statusBar()
 
         openFile = QAction(QIcon('open.png'), 'Open', self)
@@ -40,7 +38,31 @@ class Example(QMainWindow):
 
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(openFile)       
+        fileMenu.addAction(openFile)
+        
+        
+        self.textEdit = QTextEdit()
+
+        
+        okButton = QPushButton("OK")
+        cancelButton = QPushButton("Cancel")
+
+        hbox = QHBoxLayout()
+        
+        hbox.addStretch(1)
+        hbox.addWidget(okButton)
+        hbox.addStretch(1)
+        hbox.addWidget(cancelButton)
+        hbox.addStretch(1)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.textEdit)
+        vbox.addLayout(hbox)
+        
+        widget = QWidget()
+        widget.setLayout(vbox)    
+        self.setCentralWidget( widget )
+
         
         self.setGeometry(300, 300, 350, 300)
         self.setWindowTitle('File dialog')
