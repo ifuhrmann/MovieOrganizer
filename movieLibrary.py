@@ -61,17 +61,6 @@ class MovieLibrary():
     
     
     def scrapeFolder(self,direct):
-        print('File         :', __file__)
-        print('Access time  :', time.ctime(os.path.getatime(__file__)))
-        print('Modified time:', time.ctime(os.path.getmtime(__file__)))
-        print('Change time  :', time.ctime(os.path.getctime(__file__)))
-        print('Size         :', os.path.getsize(__file__))
-        
-        fstat = os.stat("F:/Wolf.Warrior.2.2017.1080p.BluRay.x264.DTS-WiKi.mkv")
-        print(fstat.st_size, "bytes")
-        print(fstat.st_size/(2**30),"gigabytes")
-        
-        
         directory = os.scandir(direct)
         movieList = []
         

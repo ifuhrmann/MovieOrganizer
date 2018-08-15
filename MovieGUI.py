@@ -19,7 +19,6 @@ from PyQt5.QtCore import QCoreApplication,Qt,QSize
 from PyQt5.QtGui import QIcon,QFont
 
 import movieLibrary as ml
-import movieClassInfo
 
 from PyQt5.QtGui import QIcon
 
@@ -68,6 +67,10 @@ class Example(QMainWindow):
     
     def __init__(self):
         super().__init__()
+        #the things I'm going to use later for sure go here for understanding
+        self.pagenum = 0
+        self.sortBy = ""
+
         self.initUI()
         
             
@@ -81,17 +84,13 @@ class Example(QMainWindow):
         if self.pagenum>0:
             self.pagenum-=1
             del(self.widget)
-            self.widget = QWidget()
-            self.widget.setLayout(self.makeLayout())    
-            self.setCentralWidget( self.widget )
+            self.makeLayout()  
     
     def nextPageFunc(self):
         if self.pagenum*50+49<len(self.movieList):
             self.pagenum+=1
             del(self.widget)
-            self.widget = QWidget()
-            self.widget.setLayout(self.makeLayout())    
-            self.setCentralWidget( self.widget )
+            self.makeLayout()  
     
     def setMovieList(self):
         self.movieList = []
@@ -103,7 +102,30 @@ class Example(QMainWindow):
                 dlist.remove(d)
         m = ml.MovieLibrary(dlist)
         m.updateAll()
-        self.movieList = m.sortBy("")
+        self.movieList = m.sortBy(self.sortBy)
+        self.makeLayout()
+        
+        
+    def sortMovieList(self):
+        if self.sender().text() =='Year ↑':
+            self.sortBy = 'year asc'
+            self.sender().setText('Year ↓')
+        elif self.sender().text() =='Year ↓':
+            self.sortBy = 'year desc'
+            self.sender().setText('Year ↑')
+
+        self.movieList = []
+        f = open("directoryList.txt","r") 
+        data = f.read()
+        dlist = data.split(" ")
+        for d in dlist :
+            if d == "":
+                dlist.remove(d)
+        m = ml.MovieLibrary(dlist)
+        m.updateAll()
+        self.movieList = m.sortBy(self.sortBy)
+        self.makeLayout()
+
 
 
     def makeLayout(self):
@@ -119,11 +141,14 @@ class Example(QMainWindow):
                 layout.addWidget(self.mWidgets[i*10 + j],i,j)
         
         hbox = QHBoxLayout()
+        s=""
         if  (self.pagenum+1)*50-1 < len(self.movieList):
-            moviesShown = QLabel( str(self.pagenum*50)+"-"+str((self.pagenum+1)*50-1)+" out of "+str(len(self.movieList))   )
+            s =  str(self.pagenum*50+1)+"-"+str((self.pagenum+1)*50)+" out of "+str(len(self.movieList)) 
         else:
-            moviesShown = QLabel( str(self.pagenum*50)+"-"+str(len(self.movieList))+" out of "+str(len(self.movieList))   )
-        
+            s= str(self.pagenum*50+1)+"-"+str(len(self.movieList))+" out of "+str(len(self.movieList))   
+        if self.sortBy is not "":
+            s+=" ordered by "+self.sortBy
+        moviesShown = QLabel( s )
         prevPage = QPushButton("<")
         prevPage.clicked.connect(self.prevPageFunc)
         nextPage = QPushButton(">")
@@ -136,7 +161,10 @@ class Example(QMainWindow):
         hbox.addWidget(nextPage)
         hbox.addStretch(20)
         layout.addLayout(hbox,5,0,1,10)
-        return layout
+        
+        self.widget = QWidget()
+        self.widget.setLayout(layout)    
+        self.setCentralWidget( self.widget )
 
         
     def initUI(self):      
@@ -163,12 +191,19 @@ class Example(QMainWindow):
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openFile)
         fileMenu.addAction(quitAction)
+        
+        
+        updateAct = QAction( 'Update Library', self)
+        updateAct.setShortcut('Ctrl+U')
+        updateAct.triggered.connect(self.setMovieList)
 
+        sortYear = QAction( 'Year ↑', self)
+        sortYear.triggered.connect(self.sortMovieList)
+
+        self.toolbar = self.addToolBar('')
+        self.toolbar.addAction(updateAct)
+        self.toolbar.addAction(sortYear)
         self.setMovieList()
-        self.pagenum = 0
-        self.widget = QWidget()
-        self.widget.setLayout(self.makeLayout())    
-        self.setCentralWidget( self.widget )
         #self.setGeometry(400,400,400,400)
         #self.resize(800,600) 
         self.setWindowTitle('Movie Organizer')
