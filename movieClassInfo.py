@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
 from imdb import IMDb
-import time
 import re
 import datetime
 
 def imdbTest():
     ia = IMDb()
-    tinit = time.time()
-    print( tinit )
     # get a movie and print its director(s)
-    m = ia.search_movie("The Matrix")
-    print(m)
-    ia.update(m[0])
-    print(m[0].movieID,m[0].get('directed by'))
-    print(time.time()-tinit)
+    m = ia.get_movie("2592594")
+    print(m.get('year'))
 
 
 class MovieInfo():
@@ -41,8 +35,6 @@ class MovieInfo():
             return( self.filename )
         else:
             return self.actualName
-    def setSeen(self,value = True):
-        self.hasSeen = value
     
     def scrapeImdb(self):
         word = re.split('\.| |-|\(|\)|\[|\]|\{|\}',self.filename)
@@ -58,7 +50,6 @@ class MovieInfo():
             for x in range(len(word)):
                 i = len(word)-x-1
                 try:
-                    testyear = word[i]
                     if( datetime.datetime.now().year >= int(word[i]) and int(word[i]) >= 1930):
                         self.year = int(word[i])
                         break
@@ -67,21 +58,50 @@ class MovieInfo():
         print(self.year)
         print(s)
         ia = IMDb()
-        m = ia.search_movie(s)
-        if(len(m) is not 0):
-            ia.update(m[0])
-            self.actualName = m[0].get('title')
-            self.imdb = m[0].movieID
-            self.imdbRating=m[0].get('rating')
-            print(m[0].movieID,m[0].get('title'),m[0].get('plot summary'))
+        mov = ia.search_movie(s)
+        if(len(mov) is not 0):
+            for m in mov:
+                if(self.year is not None):
+                    if(self.year == m.get('year')):
+                        self.actualName = m.get('title')
+                        self.imdb = m.movieID
+                        ia.update(m,['vote details'])
+                        self.imdbRating=m.get("arithmetic mean")
+                        break
+                else:
+                    self.actualName = m.get('title')
+                    self.imdb = m.movieID
+                    ia.update(m,['vote details'])
+                    self.imdbRating=m.get("arithmetic mean")
+                    break
         else:
             self.imdb = "Imdb Update Failed"
+        if len(mov) is not 0 and self.year is not None and self.imdbRating is None:
+                    self.actualName = mov[0].get('title')
+                    self.imdb = mov[0].movieID
+                    ia.update(mov[0],['vote details'])
+                    self.imdbRating=mov[0].get("arithmetic mean")
+        print(self.year,self.actualName,self.imdb,self.imdbRating)
         
     def updateName(self,name):
         self.actualName=name
     
     def updateImdb(self,imdb):
-        self.imdb=imdb
+        if imdb.startswith("https://www.imdb.com/title/tt"):
+            imdb = imdb[len("https://www.imdb.com/title/tt"):]
+        if imdb.startswith("tt"):
+            imdb = imdb[2:]
+        ia = IMDb()
+        m = ia.get_movie(imdb)
+        self.actualName = m.get('title')
+        self.imdb = m.movieID
+        ia.update(m,['vote details'])
+        self.imdbRating=m.get("arithmetic mean")
+
     
     def updateRating(self,rate):
         self.personalRating=rate
+        
+    def setSeen(self,value = True):
+        self.hasSeen = value
+    

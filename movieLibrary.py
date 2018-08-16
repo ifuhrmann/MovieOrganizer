@@ -164,7 +164,6 @@ class MovieLibrary():
                 except:
                     print("stupid ratshit imdb search is down for some reason")
                 i=movies.insert()
-                print(x.modifiedTime)
                 i.execute({"filename":x.filename,"path":x.path,"modifiedTime":x.modifiedTime,
                            "size":x.size,"actualName":x.actualName,"hasSeen":x.hasSeen,
                            "imdb":x.imdb,"personalRating":x.personalRating,"imdbRating":x.imdbRating,"year":x.year})
@@ -271,6 +270,105 @@ class MovieLibrary():
                     print(mov.filename, "updated with name",mov.actualName,"imdb",mov.imdb)
                 except:
                     print("stupid ratshit imdb isn't working")
+        session.close()
+        
+        
+    def updateImdb(self,movie,imdb):
+        try:
+            movie.updateImdb(imdb)
+            Base = declarative_base()
+            db_path = "movieLibrary.db"
+            engine = create_engine('sqlite:///' + db_path)
+                # Bind the engine to the metadata of the Base class so that the
+                # declaratives can be accessed through a DBSession instance
+            Base.metadata.bind = engine
+            metadata = MetaData(engine)
+            
+            DBSession = sessionmaker(bind=engine)
+                # A DBSession() instance establishes all conversations with the database
+                # and represents a "staging zone" for all the objects loaded into the
+                # database session object. Any change made against the objects in the
+                # session won't be persisted into the database until you call
+                # session.commit(). If you're not happy about the changes, you can
+                # revert all of them back to the last commit by calling
+                # session.rollback()
+            session = DBSession()
+             
+            Base.metadata.create_all(engine)
+               
+            movies = Table('movies', metadata, autoload=True)
+            conn = engine.connect()
+            stmt = movies.update().\
+                            values(imdb = movie.imdb , actualName = movie.actualName , imdbRating = movie.imdbRating, year = movie.year).\
+                            where(movies.c.path == movie.path)
+            conn.execute(stmt)
+            print(movie.filename, "updated with name",movie.actualName,"imdb",movie.imdb)
+            session.close()
+        except:
+            print("imdb isn't working right now")
+
+
+    def updateRating(self,movie,rate):
+        movie.updateRating(rate)
+        Base = declarative_base()
+        db_path = "movieLibrary.db"
+        engine = create_engine('sqlite:///' + db_path)
+            # Bind the engine to the metadata of the Base class so that the
+            # declaratives can be accessed through a DBSession instance
+        Base.metadata.bind = engine
+        metadata = MetaData(engine)
+        
+        DBSession = sessionmaker(bind=engine)
+            # A DBSession() instance establishes all conversations with the database
+            # and represents a "staging zone" for all the objects loaded into the
+            # database session object. Any change made against the objects in the
+            # session won't be persisted into the database until you call
+            # session.commit(). If you're not happy about the changes, you can
+            # revert all of them back to the last commit by calling
+            # session.rollback()
+        session = DBSession()
+         
+        Base.metadata.create_all(engine)
+           
+        movies = Table('movies', metadata, autoload=True)
+        conn = engine.connect()
+        stmt = movies.update().\
+                        values(personalRating=movie.personalRating).\
+                        where(movies.c.path == movie.path)
+        conn.execute(stmt)
+        print(movie.filename, "updated with rating ",movie.personalRating)
+        session.close()
+
+    def setSeen(movie,seen):
+        print(movie,seen)
+        movie.setSeen(seen)
+        Base = declarative_base()
+        db_path = "movieLibrary.db"
+        engine = create_engine('sqlite:///' + db_path)
+            # Bind the engine to the metadata of the Base class so that the
+            # declaratives can be accessed through a DBSession instance
+        Base.metadata.bind = engine
+        metadata = MetaData(engine)
+        
+        DBSession = sessionmaker(bind=engine)
+            # A DBSession() instance establishes all conversations with the database
+            # and represents a "staging zone" for all the objects loaded into the
+            # database session object. Any change made against the objects in the
+            # session won't be persisted into the database until you call
+            # session.commit(). If you're not happy about the changes, you can
+            # revert all of them back to the last commit by calling
+            # session.rollback()
+        session = DBSession()
+         
+        Base.metadata.create_all(engine)
+           
+        movies = Table('movies', metadata, autoload=True)
+        conn = engine.connect()
+        stmt = movies.update().\
+                        values(hasSeen=movie.hasSeen).\
+                        where(movies.c.path == movie.path)
+        conn.execute(stmt)
+        print(movie.filename, "updated with seen ",movie.hasSeen)
         session.close()
 
 #if you initialize a movieLibrary with a folder and a folder inside it you're going to hell

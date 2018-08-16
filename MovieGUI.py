@@ -1,46 +1,19 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
-"""
-ZetCode PyQt5 tutorial 
-
-In this example, we create a simple
-window in PyQt5.
-
-Author: Jan Bodnar
-Website: zetcode.com 
-Last edited: August 2017
-"""
-
 import sys
-from PyQt5.QtWidgets import (QWidget,QMainWindow, QTextEdit, 
+from PyQt5.QtWidgets import (QWidget,QMainWindow, QTextEdit,QMenu,
     QAction, QFileDialog, QApplication,QPushButton, QHBoxLayout, QVBoxLayout,QGridLayout,QFrame,QLabel)
 from PyQt5.QtCore import QCoreApplication,Qt,QSize
 from PyQt5.QtGui import QIcon,QFont
 
 import movieLibrary as ml
 
-from PyQt5.QtGui import QIcon
-
-
 
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-"""
-ZetCode PyQt5 tutorial 
-
-In this example, we select a file with a
-QFileDialog and display its contents
-in a QTextEdit.
-
-Author: Jan Bodnar
-Website: zetcode.com 
-Last edited: August 2017
-"""
 class MovieWidget(QFrame):
     def __init__(self,movie):
         super().__init__()
+        self.movie = movie
         self.setFrameShape(QFrame.Panel)
         self.setFrameShadow(QFrame.Sunken)
         self.setLineWidth(3)
@@ -54,11 +27,39 @@ class MovieWidget(QFrame):
         year = QLabel( str(movie.year) ) 
         year.setAlignment(Qt.AlignCenter)
         
+        
+        rate = QLabel( "IMDb Rating: " + str(movie.imdbRating) ) 
+        rate.setAlignment(Qt.AlignCenter)
+        
+
         vbox = QVBoxLayout()
+        if(movie.hasSeen == True):
+            seen = QLabel("Seen")
+            seen.setAlignment(Qt.AlignRight)
+            vbox.addWidget(seen)
+        vbox.addStretch(1)
         vbox.addWidget(self.text)
+        vbox.addStretch(1)
         vbox.addWidget(year)
+        vbox.addStretch(1)
+        vbox.addWidget(rate)
+        vbox.addStretch(1)
         self.setLayout(vbox)
 
+
+    def contextMenuEvent(self, event):
+       
+           cmenu = QMenu(self)
+           
+           newAct = cmenu.addAction("More Info")
+           seenAct = cmenu.addAction("Toggle Seen")
+           quitAct = cmenu.addAction("Quit")
+           action = cmenu.exec_(self.mapToGlobal(event.pos()))
+           if action == seenAct:
+               ml.MovieLibrary.setSeen(self.movie, not self.movie.hasSeen)
+           if action == quitAct:
+               return
+               self.safeQuit()
 
 
 
@@ -113,7 +114,42 @@ class Example(QMainWindow):
         elif self.sender().text() =='Year ↓':
             self.sortBy = 'year desc'
             self.sender().setText('Year ↑')
+            
+        if self.sender().text() =='Imdb Rating ↑':
+            self.sortBy = 'imdbRating asc'
+            self.sender().setText('Imdb Rating ↓')
+        elif self.sender().text() =='Imdb Rating ↓':
+            self.sortBy = 'imdbRating desc'
+            self.sender().setText('Imdb Rating ↑')
 
+        if self.sender().text() =='Personal Rating ↑':
+            self.sortBy = 'personalRating asc'
+            self.sender().setText('Personal Rating ↓')
+        elif self.sender().text() =='Personal Rating ↓':
+            self.sortBy = 'personalRating desc'
+            self.sender().setText('Personal Rating ↑')
+            
+        if self.sender().text() =='Has Seen':
+            self.sortBy = 'hasSeen asc'
+            self.sender().setText("Hasn't Seen")
+        elif self.sender().text() =="Hasn't Seen":
+            self.sortBy = 'hasSeen desc'
+            self.sender().setText('Has Seen')
+
+        if self.sender().text() =='Name ↑':
+            self.sortBy = 'actualName asc'
+            self.sender().setText('Name ↓')
+        elif self.sender().text() =='Name ↓':
+            self.sortBy = 'actualName desc'
+            self.sender().setText('Name ↑')
+
+        if self.sender().text() =='Modified Time ↑':
+            self.sortBy = 'modifiedTime asc'
+            self.sender().setText('Modified Time ↓')
+        elif self.sender().text() =='Modified Time ↓':
+            self.sortBy = 'modifiedTime desc'
+            self.sender().setText('Modified Time ↑')
+            
         self.movieList = []
         f = open("directoryList.txt","r") 
         data = f.read()
@@ -200,9 +236,29 @@ class Example(QMainWindow):
         sortYear = QAction( 'Year ↑', self)
         sortYear.triggered.connect(self.sortMovieList)
 
+        sortImdb = QAction( 'Imdb Rating ↑', self)
+        sortImdb.triggered.connect(self.sortMovieList)
+        
+        sortRate = QAction( 'Personal Rating ↑', self)
+        sortRate.triggered.connect(self.sortMovieList)
+        
+        seen = QAction( 'Has Seen', self)
+        seen.triggered.connect(self.sortMovieList)
+
+        name = QAction( 'Name ↑', self)
+        name.triggered.connect(self.sortMovieList)
+        
+        modified = QAction( 'Modified Time ↑', self)
+        modified.triggered.connect(self.sortMovieList)
+
         self.toolbar = self.addToolBar('')
         self.toolbar.addAction(updateAct)
         self.toolbar.addAction(sortYear)
+        self.toolbar.addAction(sortImdb)
+        self.toolbar.addAction(sortRate)
+        self.toolbar.addAction(seen)
+        self.toolbar.addAction(name)
+        self.toolbar.addAction(modified)
         self.setMovieList()
         #self.setGeometry(400,400,400,400)
         #self.resize(800,600) 
