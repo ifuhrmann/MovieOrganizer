@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import (QWidget,QMainWindow, QTextEdit,QMenu,
+from PyQt5.QtWidgets import (QWidget,QMainWindow, QTextEdit,QMenu,QDialog,
     QAction, QFileDialog, QApplication,QPushButton, QHBoxLayout, QVBoxLayout,QGridLayout,QFrame,QLabel)
 from PyQt5.QtCore import QCoreApplication,Qt,QSize
 from PyQt5.QtGui import QIcon,QFont
@@ -9,6 +9,34 @@ import movieLibrary as ml
 
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+class MovieWindow(QDialog):
+    def __init__(self,movie):
+        super(MovieWindow,self).__init__(None)
+        self.setWindowTitle(str(movie.actualName) + " Info")
+        
+        
+        layout = QVBoxLayout()
+        layout.addStretch(1)
+        layout.addWidget(QLabel("Filename: "+movie.filename))
+        layout.addStretch(1)
+        layout.addWidget(QLabel("Path: "+movie.path))
+        layout.addStretch(1)
+        layout.addWidget(QLabel("Modified Time: "+str(movie.modifiedTime)))
+        layout.addStretch(1)
+        layout.addWidget(QLabel("Size: "+str(movie.size/2**30)+" Gigabytes"))
+        #layout.addWidget(QLabel("Filename: "+movie.filename))
+
+        l = QHBoxLayout()
+        l.addStretch(1)
+        okB=QPushButton("&OK")
+        okB.clicked.connect(self.okClicked)
+        l.addWidget(okB)        
+        l.addStretch(1)
+        layout.addLayout(l)
+        self.setLayout(layout)
+        
+    def okClicked(self):
+        self.accept()
 
 class MovieWidget(QFrame):
     def __init__(self,movie):
@@ -51,10 +79,13 @@ class MovieWidget(QFrame):
        
            cmenu = QMenu(self)
            
-           newAct = cmenu.addAction("More Info")
+           infoAct = cmenu.addAction("More Info")
            seenAct = cmenu.addAction("Toggle Seen")
            quitAct = cmenu.addAction("Quit")
            action = cmenu.exec_(self.mapToGlobal(event.pos()))
+           if action == infoAct:
+               m = MovieWindow(self.movie)
+               m.exec_()
            if action == seenAct:
                ml.MovieLibrary.setSeen(self.movie, not self.movie.hasSeen)
            if action == quitAct:
@@ -101,7 +132,16 @@ class Example(QMainWindow):
         for d in dlist :
             if d == "":
                 dlist.remove(d)
-        m = ml.MovieLibrary(dlist)
+        f.close()
+                
+        ignore = open("ignoreList.txt","r") 
+        data = ignore.read()
+        ilist = data.split("becausemovienameshavemanycharactersthiswillsplitmystring")
+        for i in ilist :
+            if i == "":
+                ilist.remove(i)
+        ignore.close()
+        m = ml.MovieLibrary(dlist,ilist)
         m.updateAll()
         self.movieList = m.sortBy(self.sortBy)
         self.makeLayout()
@@ -157,7 +197,17 @@ class Example(QMainWindow):
         for d in dlist :
             if d == "":
                 dlist.remove(d)
-        m = ml.MovieLibrary(dlist)
+        f.close()
+        
+        ignore = open("ignoreList.txt","r") 
+        data = ignore.read()
+        ilist = data.split(" ")
+        for i in ilist :
+            if i == "":
+                ilist.remove(i)
+        ignore.close()
+        
+        m = ml.MovieLibrary(dlist,ilist)
         m.updateAll()
         self.movieList = m.sortBy(self.sortBy)
         self.makeLayout()
@@ -208,7 +258,7 @@ class Example(QMainWindow):
         s = fh.read()
         if(s is ""):
             self.setInitDir()
-        
+        fh.close()
         self.statusBar()
         
         openFile = QAction(QIcon('open.png'), 'Add Directory', self)
@@ -221,11 +271,19 @@ class Example(QMainWindow):
         quitAction.triggered.connect(self.safeQuit)
         quitAction.setShortcut('Ctrl+Q')
         
-
+        ignoreAction = QAction('Ignore Directory',self)
+        ignoreAction.triggered.connect(self.ignoreDirect)
+        ignoreAction.setShortcut('Ctrl+I')
+        
+        ignoreFile = QAction('Ignore File',self)
+        ignoreFile.triggered.connect(self.ignoreFile)
+        ignoreFile.setShortcut('Ctrl+I')
 
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openFile)
+        fileMenu.addAction(ignoreAction)
+        fileMenu.addAction(ignoreFile)
         fileMenu.addAction(quitAction)
         
         
@@ -278,6 +336,22 @@ class Example(QMainWindow):
         if fname is not "":
             F = open("directoryList.txt","a") 
             F.write(fname+" ")
+            F.close()
+            
+    def ignoreDirect(self):
+        fname = QFileDialog.getExistingDirectory(self, 'Ignore Directory', '/home')
+        if fname is not "":
+            print(fname)
+            F = open("ignoreList.txt","a") 
+            F.write(fname+"becausemovienameshavemanycharactersthiswillsplitmystring")
+            F.close()
+            
+    def ignoreFile(self):
+        fname = QFileDialog.getOpenFileName(self, 'Ignore File', '/home')
+        if fname is not "":
+            print(fname)
+            F = open("ignoreList.txt","a") 
+            F.write(fname[0]+"becausemovienameshavemanycharactersthiswillsplitmystring")
             F.close()
 
         

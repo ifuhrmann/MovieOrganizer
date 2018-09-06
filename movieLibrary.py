@@ -20,8 +20,9 @@ from datetime import datetime
 
 class MovieLibrary():
     
-    def __init__(self, directories):
+    def __init__(self, directories,ignoreList=[]):
         self.directories=directories
+        self.ignoreList = ignoreList
         self.scrapeAll()
 
     
@@ -71,12 +72,23 @@ class MovieLibrary():
                     if ((not d2.is_dir()) and (d2.path.endswith(".mkv") or d2.path.endswith(".mp4")) and
                         "sample" not in d2.name.lower() and os.path.getsize(d2) > 500000000 and
                         "S0" not in d2.path):
-                        movieList.append(d2)
+                        ignore = False
+                        for i in self.ignoreList:
+                            if(d2.path.startswith(i)):
+                                ignore = True
+                        if not ignore:
+                            movieList.append(d2)
             else:
                 if ("sample" not in d.name.lower() and 'System Volume Information' not in d.name and
                     'DVD' not in d.name and (d.path.endswith(".mkv") or d.path.endswith(".mp4")) and
                     os.path.getsize(d)  > 500000000 and "S0" not in d.path):
-                    movieList.append(d)
+                    ignore = False
+                    for i in self.ignoreList:
+                        if(d.path.startswith(i)):
+                            ignore = True
+                    if not ignore:
+                        movieList.append(d)
+
         
         print(len(movieList))
         
