@@ -1,19 +1,74 @@
 import sys
 from PyQt5.QtWidgets import (QWidget,QMainWindow, QTextEdit,QMenu,QDialog,
-    QAction, QFileDialog, QApplication,QPushButton, QHBoxLayout, QVBoxLayout,QGridLayout,QFrame,QLabel)
+    QAction, QFileDialog, QApplication,QPushButton, QHBoxLayout, QVBoxLayout,QGridLayout,
+    QFrame,QLabel,QRadioButton)
 from PyQt5.QtCore import QCoreApplication,Qt,QSize
 from PyQt5.QtGui import QIcon,QFont
+from pathlib import Path
 
 import movieLibrary as ml
 
 
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
+class RatingBox(QDialog):
+    
+    def __init__(self):
+        self.rating = None
+        self.buttons = []
+        super(RatingBox,self).__init__(None)
+        self.setWindowTitle("Rating")
+        layout = QVBoxLayout()
+        layout.addStretch(1)
+        text = QHBoxLayout()
+        text.addStretch(1)
+        text.addWidget(QLabel("Enter Your Rating "))
+        text.addStretch(1)
+        layout.addLayout(text)
+        layout.addStretch(1)
+        buttons = QHBoxLayout()
+        for i in range(0,11):
+            b = QRadioButton(str(i))
+            buttons.addWidget(b)
+            self.buttons.append(b)
+            b.toggled.connect( self.buttonState )
+
+        #layout.addWidget(QLabel("Filename: "+movie.filename))
+        layout.addLayout(buttons)
+        l = QHBoxLayout()
+        l.addStretch(1)
+        okB=QPushButton("&OK")
+        okB.clicked.connect(self.okClicked)
+        l.addWidget(okB)        
+        l.addStretch(1)
+        layout.addLayout(l)
+        
+        l.addStretch(1)
+        okB=QPushButton("&Cancel")
+        okB.clicked.connect(self.cancelClicked)
+        l.addWidget(okB)        
+        l.addStretch(1)
+
+        self.setLayout(layout)
+        
+    def buttonState(self):
+        for i in range(0,11):
+            if self.buttons[i].isChecked():
+                self.rating = int(self.buttons[i].text())
+                break
+        #self.rating = int(b.text())
+        
+    def okClicked(self):
+        self.accept()
+        
+    def cancelClicked(self):
+        self.reject()
+
 class MovieWindow(QDialog):
     def __init__(self,movie):
         super(MovieWindow,self).__init__(None)
         self.setWindowTitle(str(movie.actualName) + " Info")
-        
         
         layout = QVBoxLayout()
         layout.addStretch(1)
@@ -32,11 +87,14 @@ class MovieWindow(QDialog):
         okB.clicked.connect(self.okClicked)
         l.addWidget(okB)        
         l.addStretch(1)
+        
         layout.addLayout(l)
         self.setLayout(layout)
         
     def okClicked(self):
         self.accept()
+        
+
 
 class MovieWidget(QFrame):
     def __init__(self,movie):
@@ -65,13 +123,19 @@ class MovieWidget(QFrame):
             seen = QLabel("Seen")
             seen.setAlignment(Qt.AlignRight)
             vbox.addWidget(seen)
-        vbox.addStretch(1)
+        if(movie.personalRating is not None):
+            prate = QLabel("Rating: "+str(movie.personalRating))
+            prate.setAlignment(Qt.AlignRight)
+            vbox.addWidget(prate)
+    
+        
+        vbox.addStretch(10)
         vbox.addWidget(self.text)
-        vbox.addStretch(1)
+        vbox.addStretch(10)
         vbox.addWidget(year)
-        vbox.addStretch(1)
+        vbox.addStretch(10)
         vbox.addWidget(rate)
-        vbox.addStretch(1)
+        vbox.addStretch(10)
         self.setLayout(vbox)
 
 
@@ -81,17 +145,18 @@ class MovieWidget(QFrame):
            
            infoAct = cmenu.addAction("More Info")
            seenAct = cmenu.addAction("Toggle Seen")
-           quitAct = cmenu.addAction("Quit")
+           ratingAct = cmenu.addAction("Add Rating")
            action = cmenu.exec_(self.mapToGlobal(event.pos()))
            if action == infoAct:
                m = MovieWindow(self.movie)
                m.exec_()
            if action == seenAct:
                ml.MovieLibrary.setSeen(self.movie, not self.movie.hasSeen)
-           if action == quitAct:
-               return
-               self.safeQuit()
-
+           if action == ratingAct:
+               r = RatingBox()
+               if r.exec_():
+                   if r.rating is not None:
+                       ml.MovieLibrary.setPersonalRating(self.movie, r.rating)
 
 
 
@@ -126,15 +191,20 @@ class Example(QMainWindow):
     
     def setMovieList(self):
         self.movieList = []
-        f = open("directoryList.txt","r") 
+        f = open("directoryList.txt","r+") 
         data = f.read()
         dlist = data.split(" ")
         for d in dlist :
             if d == "":
                 dlist.remove(d)
         f.close()
-                
-        ignore = open("ignoreList.txt","r") 
+        try:        
+            ignore = open("ignoreList.txt","r") 
+        except:
+            filename = Path( "ignoreList.txt" )
+            filename.touch(exist_ok=True)  # will create file, if it exists will do nothing
+            ignore = open(filename,"r")
+
         data = ignore.read()
         ilist = data.split("becausemovienameshavemanycharactersthiswillsplitmystring")
         for i in ilist :
@@ -254,7 +324,12 @@ class Example(QMainWindow):
 
         
     def initUI(self):      
-        fh = open("directoryList.txt", "r")
+        try:        
+            fh = open("directoryList.txt","r") 
+        except:
+            filename = Path( "directoryList.txt" )
+            filename.touch(exist_ok=True)  # will create file, if it exists will do nothing
+            fh = open(filename,"r")
         s = fh.read()
         if(s is ""):
             self.setInitDir()
