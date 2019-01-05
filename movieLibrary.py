@@ -414,7 +414,7 @@ class MovieLibrary():
                         values(personalRating=movie.personalRating).\
                         where(movies.c.path == movie.path)
         conn.execute(stmt)
-        print(movie.filename, "updated with rating ",movie.rating)
+        print(movie.filename, "updated with rating ",movie.personalRating)
         session.close()
 
 

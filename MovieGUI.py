@@ -7,7 +7,9 @@ from PyQt5.QtGui import QIcon,QFont
 from pathlib import Path
 
 import movieLibrary as ml
-
+import subprocess
+#subprocess.call()
+vlc = 'C:/Program Files (x86)/VideoLAN/VLC/vlc.exe'
 
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
@@ -120,13 +122,14 @@ class MovieWidget(QFrame):
 
         vbox = QVBoxLayout()
         if(movie.hasSeen == True):
-            seen = QLabel("Seen")
+            s=""
+            if(movie.personalRating is not None):
+                s+="Rating: "+str(movie.personalRating)
+            else:
+                s+="Seen"
+            seen = QLabel(s)
             seen.setAlignment(Qt.AlignRight)
             vbox.addWidget(seen)
-        if(movie.personalRating is not None):
-            prate = QLabel("Rating: "+str(movie.personalRating))
-            prate.setAlignment(Qt.AlignRight)
-            vbox.addWidget(prate)
     
         
         vbox.addStretch(10)
@@ -146,6 +149,7 @@ class MovieWidget(QFrame):
            infoAct = cmenu.addAction("More Info")
            seenAct = cmenu.addAction("Toggle Seen")
            ratingAct = cmenu.addAction("Add Rating")
+           playAct = cmenu.addAction("Play Movie")
            action = cmenu.exec_(self.mapToGlobal(event.pos()))
            if action == infoAct:
                m = MovieWindow(self.movie)
@@ -157,6 +161,11 @@ class MovieWidget(QFrame):
                if r.exec_():
                    if r.rating is not None:
                        ml.MovieLibrary.setPersonalRating(self.movie, r.rating)
+           if action == playAct:
+               print(self.movie.path)
+               
+               subprocess.Popen(["vlc.exe",self.movie.path.replace("/","\\")],executable = vlc)
+
 
 
 
