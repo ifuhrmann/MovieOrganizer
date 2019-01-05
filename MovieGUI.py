@@ -163,9 +163,11 @@ class MovieWidget(QFrame):
                        ml.MovieLibrary.setPersonalRating(self.movie, r.rating)
            if action == playAct:
                print(self.movie.path)
-               
-               subprocess.Popen(["vlc.exe",self.movie.path.replace("/","\\")],executable = vlc)
-
+               try:
+                   subprocess.Popen(["vlc.exe",self.movie.path.replace("/","\\")],executable = vlc)
+               except:
+                   print("VLC Media Player is not installed where I think it was.")
+                   print("Make sure it is installed correctly, then change line 12 to the correct path to the executable.")
 
 
 
